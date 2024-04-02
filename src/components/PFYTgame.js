@@ -2,20 +2,26 @@ import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 
 const PFYTgame = () => {
- const [word, setWord] = useState('');
+ const targetWord = 'example';
+ const [word, setWord] = useState(Array(targetWord.length).fill('_'));
  const [guessedLetters, setGuessedLetters] = useState([]);
+ const [correctLetters, setCorrectLetters] = useState([]);
+ const [incorrectLetters, setIncorrectLetters] = useState([]);
  const [money, setMoney] = useState(100);
  const [level, setLevel] = useState(1);
 
- // Example word for the game
- const targetWord = 'example';
 
  const handleGuess = (letter) => {
-    if (targetWord.includes(letter)) {
-      setWord(word + letter);
+    if (!guessedLetters.includes(letter)) {
       setGuessedLetters([...guessedLetters, letter]);
-    } else {
-      setMoney(money - 10);
+      const newWord = word.map((char, index) => targetWord[index] === letter ? letter : char);
+      setWord(newWord);
+      if (targetWord.includes(letter)) {
+        setCorrectLetters([...correctLetters, letter]);
+      } else {
+        setIncorrectLetters([...incorrectLetters, letter]);
+        setMoney(money - 10);
+      }
     }
  };
 
@@ -28,13 +34,18 @@ const PFYTgame = () => {
           <TouchableOpacity
             key={letter}
             onPress={() => handleGuess(letter)}
-            style={styles.letterButton}
+            style={[
+              styles.letterButton,
+              incorrectLetters.includes(letter) ? styles.incorrectLetterButton : {},
+              correctLetters.includes(letter) ? styles.correctLetterButton : {},
+            ]}
+            disabled={guessedLetters.includes(letter)}
           >
             <Text style={styles.letterText}>{letter}</Text>
           </TouchableOpacity>
         ))}
       </View>
-      <Text style={styles.word}>{word}</Text>
+      <Text style={styles.word}>{word.join(' ')}</Text>
     </View>
  );
 };
